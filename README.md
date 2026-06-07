@@ -5,6 +5,8 @@
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Usage](https://img.shields.io/badge/usage-authorized%20red%20team%20only-red)
 
+![Preview](preview.png)
+
 A red team template demonstrating the **ClickFix → WebClip** social engineering chain on iOS.  
 A convincing corporate portal coaches the target into installing a `.mobileconfig` profile that places an attacker-controlled shortcut on their Home Screen.
 
