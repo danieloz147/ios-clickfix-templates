@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  INERT DEMONSTRATION PROFILE — DEFCON AWARENESS DEMO ARTIFACT
+  Engagement: [REDACTED — replace with your own engagement reference]
+
+  PURPOSE: This file demonstrates the shape of a malicious .mobileconfig that
+  a WebClip / ClickFix social-engineering lure would deliver to a victim device.
+  It is intentionally NON-FUNCTIONAL. PayloadContent is an EMPTY array.
+
+  It contains NO certificate, NO trusted root/CA, NO SCEP, NO MDM enrollment,
+  NO VPN, NO proxy, NO Wi-Fi, NO restrictions, NO web clip payload.
+
+  If a user installs this profile, iOS registers a profile that changes NOTHING
+  on the device and can be removed instantly from Settings → General → VPN &
+  Device Management. It is the equivalent of an alert(1): proof of concept,
+  not weaponization.
+
+  SECURITY REVIEW NOTE (2026-06-07):
+  A prior version of this comment block contained a real client engagement
+  identifier and date. That information has been redacted. Before publishing
+  this template, verify no internal references remain in this file.
+-->
+<plist version="1.0">
+<dict>
+    <key>PayloadContent</key>
+    <array/>
+    <key>PayloadDisplayName</key>
+    <string>פרופיל אימות ארגוני (הדגמה - לא פעיל)</string>
+    <key>PayloadDescription</key>
+    <string>Inert demonstration profile for authorized security awareness testing. Performs no action.</string>
+    <key>PayloadOrganization</key>
+    <string>Authorized Pentest - Demo Only</string>
+    <key>PayloadIdentifier</key>
+    <string>local.demo.clickfix.inert</string>
+    <key>PayloadType</key>
+    <string>Configuration</string>
+    <key>PayloadUUID</key>
+    <string>00000000-0000-0000-0000-0000DEMO0001</string>
+    <key>PayloadVersion</key>
+    <integer>1</integer>
+    <key>PayloadRemovalDisallowed</key>
+    <false/>
+</dict>
+</plist>

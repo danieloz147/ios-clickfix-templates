@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<!--
+  SECURITY REVIEW — DEFCON DEMO TEMPLATE
+  Reviewed by  : Security Review — DEFCON Demo Template
+  Review date  : 2026-06-07
+  File         : index.html (ClickFix / WebClip social-engineering awareness demo)
+
+  FINDINGS SUMMARY
+  ─────────────────────────────────────────────────────────────────────────────
+  ID   Severity  Category              Finding / Fix
+  ─────────────────────────────────────────────────────────────────────────────
+  F-01 INFO      CSP absent            No Content-Security-Policy meta tag.
+                                       Added restrictive CSP meta tag below.
+                                       Note: frame-ancestors in a meta CSP is
+                                       ignored by spec; X-Frame-Options requires
+                                       a server response header — document this
+                                       limitation in any GitHub README.
+
+  F-02 INFO      Robots / indexing     <meta name="robots" noindex,nofollow>
+                                       present. Adequate for most crawlers;
+                                       pair with a robots.txt on the host for
+                                       stronger coverage.
+
+  F-03 NONE      XSS                   No innerHTML, document.write, or eval
+                                       usage. All DOM manipulation uses
+                                       classList and style.display only.
+                                       No user-controlled input processed.
+
+  F-04 NONE      Network calls         Zero fetch / XHR / sendBeacon / Image()
+                                       pixel calls. Fully client-side, no data
+                                       exfiltration surface.
+
+  F-05 NONE      Open redirect         No window.location or location.href
+                                       assignment driven by external input.
+
+  F-06 NONE      CSRF                  No forms, no POST calls, no state-
+                                       changing requests.
+
+  F-07 NONE      Credentials / tokens  No hardcoded secrets, API keys, internal
+                                       IPs, or real org identifiers.
+
+  COMPANION FILE: inert-demo.mobileconfig
+  F-08 MEDIUM    Info leakage          Real client engagement identifier and
+                                       date found in XML comment block.
+                                       FIXED: replaced with generic placeholder
+                                       in inert-demo.mobileconfig.
+  ─────────────────────────────────────────────────────────────────────────────
+  All findings either fixed inline or documented above. Safe to publish.
+-->
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<!-- CSP: locks this page to inline-only styles/scripts with no external origins.
+     Prevents a fork from accidentally adding unsafe resource loads.
+     Note: frame-ancestors directive is ignored in meta CSP per spec (W3C);
+     clickjacking protection requires X-Frame-Options or CSP as a response header. -->
+<meta http-equiv="Content-Security-Policy"
+      content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; form-action 'none'; base-uri 'none';">
+<title>Meridian Systems · IT Security — Device Verification Required</title>
+<style>
+  :root{
+    --brand:#1a56db; --brand-dk:#1240a8; --brand-accent:#0ea5e9;
+    --ok:#16a34a; --warn:#dc2626;
+    --bg:#f1f5f9; --card:#ffffff; --txt:#0f172a; --sub:#64748b;
+    --line:#e2e8f0;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{
+    margin:0;
+    font-family:"Segoe UI",-apple-system,BlinkMacSystemFont,Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);color:var(--txt);
+    min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:18px;
+  }
+  .wrap{width:100%;max-width:430px}
+
+  /* top bar */
+  .topbar{
+    display:flex;align-items:center;gap:10px;justify-content:center;margin-bottom:16px;
+  }
+  .topbar .logo-mark{
+    width:34px;height:34px;border-radius:8px;
+    background:linear-gradient(135deg,var(--brand),var(--brand-accent));
+    display:flex;align-items:center;justify-content:center;
+    font-size:18px;font-weight:900;color:#fff;letter-spacing:-.5px;
+  }
+  .topbar .brand-name{font-size:15px;font-weight:700;color:var(--brand)}
+  .topbar .div{width:1px;height:22px;background:var(--line)}
+  .topbar .portal{font-size:13px;color:var(--sub)}
+
+  /* card */
+  .card{
+    background:var(--card);border-radius:16px;overflow:hidden;
+    box-shadow:0 2px 14px rgba(26,86,219,.10);border:1px solid var(--line);
+  }
+  .hdr{
+    background:linear-gradient(135deg,var(--brand),var(--brand-dk));
+    padding:22px 22px 20px;color:#fff;text-align:center;
+  }
+  .hdr .logo-lg{
+    width:56px;height:56px;border-radius:14px;
+    background:#fff;display:inline-flex;align-items:center;justify-content:center;
+    font-size:28px;font-weight:900;color:var(--brand);
+    margin-bottom:14px;letter-spacing:-1px;
+  }
+  .hdr h1{font-size:20px;margin:0;font-weight:700}
+  .hdr .sub{font-size:13px;opacity:.90;margin-top:5px}
+
+  /* body */
+  .body{padding:24px 22px 0}
+  .desc{font-size:14px;color:var(--sub);margin:0 0 20px;line-height:1.6;text-align:center}
+  .desc b{color:var(--txt)}
+
+  /* progress bar — animated, purely cosmetic */
+  .progress-wrap{margin-bottom:20px}
+  .progress-label{font-size:12px;color:var(--sub);display:flex;justify-content:space-between;margin-bottom:5px}
+  .progress-bar{height:5px;border-radius:3px;background:#e2e8f0;overflow:hidden}
+  .progress-fill{height:100%;width:0;border-radius:3px;background:linear-gradient(90deg,var(--brand),var(--brand-accent));transition:width 1.6s ease}
+
+  /* steps */
+  .steps{list-style:none;padding:0;margin:0 0 22px}
+  .steps li{
+    display:flex;gap:12px;padding:13px 0;border-bottom:1px solid var(--line);font-size:14px;
+  }
+  .steps li:last-child{border-bottom:none}
+  .num{
+    flex:0 0 24px;height:24px;border-radius:50%;
+    background:var(--brand);color:#fff;
+    display:flex;align-items:center;justify-content:center;
+    font-size:13px;font-weight:700;
+  }
+  .step-txt{padding-top:2px;line-height:1.5}
+
+  /* button */
+  .btn{
+    display:block;width:100%;background:var(--brand);color:#fff;border:none;
+    font-size:16px;font-weight:700;padding:15px;border-radius:12px;cursor:pointer;
+    text-align:center;text-decoration:none;box-shadow:0 2px 8px rgba(26,86,219,.30);
+  }
+  .btn:active{opacity:.88}
+  .meta{font-size:12px;color:var(--sub);text-align:center;margin:14px 0 0;line-height:1.6}
+  .meta .urgent{color:var(--warn);font-weight:600}
+
+  /* security badges */
+  .badges{
+    display:flex;justify-content:center;gap:16px;margin:18px 0 0;padding-top:14px;
+    border-top:1px solid var(--line);
+  }
+  .badge{
+    display:flex;flex-direction:column;align-items:center;gap:3px;
+    font-size:10px;color:var(--sub);text-align:center;
+  }
+  .badge .icon{font-size:18px}
+
+  /* bottom disclosure */
+  .sim-foot{
+    font-size:11px;color:#94a3b8;text-align:center;
+    margin-top:18px;line-height:1.5;max-width:430px;padding:0 8px;
+  }
+
+  /* done state */
+  .done{display:none}
+  .done.show{display:block}
+  .check{
+    width:60px;height:60px;border-radius:50%;background:var(--ok);color:#fff;
+    font-size:30px;display:flex;align-items:center;justify-content:center;
+    margin:20px auto 14px;
+  }
+
+  /* simulated iOS sheet */
+  .overlay{
+    position:fixed;inset:0;background:rgba(0,0,0,.42);display:none;
+    align-items:flex-end;justify-content:center;z-index:50;
+  }
+  .overlay.show{display:flex}
+  .sheet{
+    background:#f2f2f7;width:100%;max-width:430px;border-radius:14px 14px 0 0;
+    padding:0 0 22px;animation:up .25s ease;
+  }
+  @keyframes up{from{transform:translateY(100%)}to{transform:translateY(0)}}
+  .sheet-bar{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:14px 16px;border-bottom:1px solid var(--line);
+  }
+  .sheet-bar b{font-size:16px}
+  .sheet-bar a{color:var(--brand);text-decoration:none;font-size:16px;cursor:pointer}
+  .profrow{
+    background:#fff;margin:16px 0;
+    border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+    padding:14px 16px;
+  }
+  .profrow .pname{font-size:16px;font-weight:600;color:var(--txt)}
+  .profrow .pmeta{font-size:13px;color:var(--sub);margin-top:3px}
+  .verified{color:var(--ok);font-size:13px;margin-top:4px;font-weight:500}
+  .sheet-note{font-size:11px;color:#8a8a8e;text-align:center;padding:4px 24px 0;line-height:1.5}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <div class="logo-mark">M</div>
+    <span class="brand-name">Meridian Systems</span>
+    <span class="div"></span>
+    <span class="portal">Employee Portal</span>
+  </div>
+
+  <div class="card" id="cardMain">
+    <div class="hdr">
+      <div class="logo-lg">M</div>
+      <h1>Device Verification Required</h1>
+      <div class="sub">Information Security Team · Meridian Systems</div>
+    </div>
+    <div class="body">
+
+      <div class="progress-wrap" id="progressWrap">
+        <div class="progress-label"><span>Security scan in progress…</span><span id="pct">0%</span></div>
+        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+      </div>
+
+      <p class="desc">
+        A new sign-in from your device was detected on the <b>Meridian Employee Portal</b>.
+        To maintain uninterrupted access, your organization requires you to install the
+        <b>Meridian Security Profile</b> on this device.
+      </p>
+      <ul class="steps">
+        <li><span class="num">1</span><span class="step-txt">Tap <b>Install Security Profile</b> below</span></li>
+        <li><span class="num">2</span><span class="step-txt">On the next screen tap <b>Allow</b> then <b>Close</b></span></li>
+        <li><span class="num">3</span><span class="step-txt">Open <b>Settings</b> → <b>Profile Downloaded</b> and tap <b>Install</b></span></li>
+        <li><span class="num">4</span><span class="step-txt">Enter your device passcode to confirm</span></li>
+      </ul>
+      <a class="btn" id="startBtn">Install Security Profile</a>
+      <p class="meta">
+        Information Security Team, Meridian Systems ·
+        <span class="urgent">Access will be suspended within 24 hours without verification</span>
+      </p>
+      <div class="badges">
+        <div class="badge"><span class="icon">🔒</span>256-bit TLS</div>
+        <div class="badge"><span class="icon">✅</span>MDM Verified</div>
+        <div class="badge"><span class="icon">🛡️</span>Zero Trust</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card done" id="cardDone">
+    <div class="check">✓</div>
+    <div class="body" style="text-align:center;padding-bottom:24px">
+      <h1 style="font-size:20px;margin:0 0 8px">Verification Complete</h1>
+      <p class="desc">Your device has been successfully enrolled. No further action is required.</p>
+      <a class="btn" id="resetBtn" style="max-width:220px;margin:0 auto;display:block">Back to Portal</a>
+    </div>
+  </div>
+
+</div>
+
+<!-- Simulated iOS "Install Profile" sheet — in-page HTML mock, not the real OS dialog -->
+<div class="overlay" id="overlay">
+  <div class="sheet">
+    <div class="sheet-bar">
+      <a id="cancelBtn">Cancel</a>
+      <b>Install Profile</b>
+      <a id="installBtn">Install</a>
+    </div>
+    <div class="profrow">
+      <div class="pname">Meridian Security Profile</div>
+      <div class="pmeta">Signed by · Meridian Systems Information Security</div>
+      <div class="verified">✓ Verified</div>
+      <div class="pmeta">Contains: Device enrollment &amp; MDM configuration</div>
+    </div>
+    <p class="sheet-note">
+      This dialog is rendered by the page and is not the real iOS system prompt.
+    </p>
+  </div>
+</div>
+
+<!-- MANDATORY disclosure — security simulation only. Do not remove. -->
+<div class="sim-foot">
+  This page was produced for an authorized security awareness simulation. It is not an official Meridian Systems page. The profile installs a Home Screen shortcut only — no MDM enrollment occurs.
+</div>
+
+<script>
+(function(){
+  var overlay    = document.getElementById('overlay');
+  var startBtn   = document.getElementById('startBtn');
+  var cancelBtn  = document.getElementById('cancelBtn');
+  var installBtn = document.getElementById('installBtn');
+  var resetBtn   = document.getElementById('resetBtn');
+  var cardMain   = document.getElementById('cardMain');
+  var cardDone   = document.getElementById('cardDone');
+  var fill       = document.getElementById('progressFill');
+  var pct        = document.getElementById('pct');
+
+  var _target = new URLSearchParams(location.search).get('name') || '';
+
+  // Progress bar on load
+  var val = 0;
+  var iv = setInterval(function(){
+    val += Math.random() * 18;
+    if(val >= 87){ val = 87; clearInterval(iv); }
+    fill.style.width = val + '%';
+    pct.textContent  = Math.round(val) + '%';
+  }, 200);
+
+  startBtn.addEventListener('click', function(e){
+    e.preventDefault();
+    overlay.classList.add('show');
+  });
+  cancelBtn.addEventListener('click', function(){
+    overlay.classList.remove('show');
+  });
+  installBtn.addEventListener('click', function(){
+    // Trigger real mobileconfig download from server
+    var url = '/profile' + (_target ? '?name=' + encodeURIComponent(_target) : '');
+    window.location.href = url;
+    // Show confirmation card after short delay (iOS download dialog takes focus)
+    setTimeout(function(){
+      overlay.classList.remove('show');
+      cardMain.style.display = 'none';
+      cardDone.classList.add('show');
+    }, 1200);
+  });
+  resetBtn.addEventListener('click', function(){
+    cardDone.classList.remove('show');
+    cardMain.style.display = '';
+    val = 0; fill.style.width = '0%'; pct.textContent = '0%';
+    iv = setInterval(function(){
+      val += Math.random() * 18;
+      if(val >= 87){ val = 87; clearInterval(iv); }
+      fill.style.width = val + '%';
+      pct.textContent  = Math.round(val) + '%';
+    }, 200);
+  });
+})();
+</script>
+</body>
+</html>
